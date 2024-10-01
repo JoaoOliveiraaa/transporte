@@ -1,68 +1,22 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, Button, Alert } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from './LoginScreen'; 
+import RegistrationScreen from './RegistrationScreen';
+import HomeScreen from './HomeScreen';
 
-const LoginScreen = () => {
-  const [email, setEmail] = useState('');
+const Stack = createStackNavigator();
 
-  const handleLogin = async () => {
-    const apiUrl = 'https://jsonplaceholder.typicode.com/users';
-
-    if (email) {
-      try {
-        const response = await fetch(apiUrl);
-        const users = await response.json();
-
-        console.log(users);
-
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-        if (user) {
-          Alert.alert('Login bem-sucedido', `Nome: ${user.name}\nE-mail: ${user.email}`);
-        } else {
-          Alert.alert('Erro', 'Usuário não encontrado.');
-        }
-      } catch (error) {
-        Alert.alert('Erro', 'Ocorreu um erro ao fazer a requisição.');
-      }
-    } else {
-      Alert.alert('Erro', 'Por favor, preencha o campo de e-mail.');
-    }
-  };
-
+const App = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-      <Button title="Entrar" onPress={handleLogin} />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="LoginScreen">
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ title: 'Login' }} />
+        <Stack.Screen name="RegistrationScreen" component={RegistrationScreen} options={{ title: 'Registro' }} />
+        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Home' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 10,
-  },
-});
-
-export default LoginScreen;
+export default App;
