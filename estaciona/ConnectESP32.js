@@ -1,60 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TextInput, StyleSheet, Alert } from 'react-native';
+import { BleManager } from 'react-native-ble-plx';
 
 const ConnectESP32 = () => {
-  const [wifiSSID, setWifiSSID] = useState('');
-  const [wifiPassword, setWifiPassword] = useState('');
+  const [bleManager] = useState(new BleManager());
+  const [device, setDevice] = useState(null);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    return () => bleManager.destroy(); // Limpeza do gerenciador BLE ao desmontar o componente
+  }, []);
 
   const handleConnect = async () => {
-  if (wifiSSID && wifiPassword) {
-    Alert.alert('Conectando', `Conectando ao ESP32 com SSID: ${wifiSSID}`);
-    
-    try {
-      const response = await fetch('http://192.168.4.1/wifi-setup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ssid: wifiSSID,
-          password: wifiPassword,
-        }),
-      });
-
-      const result = await response.json();
-      if (result.status === 'connected') {
-        Alert.alert('Sucesso', 'Conectado ao Wi-Fi com sucesso!');
-      } else {
-        Alert.alert('Erro', 'Falha ao conectar ao Wi-Fi.');
+    // Escaneia e conecta ao ESP32
+    bleManager.startDeviceScan(null, null, (error, scannedDevice) => {
+      if (error) {
+        Alert.alert('Erro', 'Erro ao escanear dispositivos.');
+        return;
       }
-    } catch (error) {
-      Alert.alert('Erro', 'Erro ao conectar ao ESP32.');
-    }
-  } else {
-    Alert.alert('Erro', 'Por favor, insira o SSID e a senha do WiFi.');
-  }
-};
 
+      // Substitua 'ESP32' pelo nome ou ID do seu dispositivo ESP32
+      if (scannedDevice && scannedDevice.name === 'ESP32') {
+        bleManager.stopDeviceScan();
+        setDevice(scannedDevice);
+        scannedDevice.connect().then((connectedDevice) => {
+          Alert.alert('Conectado', 'Conectado ao ESP32 via Bluetooth.');
+        }).catch((connectError) => {
+          Alert.alert('Erro', 'Erro ao conectar ao ESP32.');
+        });
+      }
+    });
+  };
+
+  const sendDataToDevice = async () => {
+    if (!device) {
+      Alert.alert('Erro', 'Conecte ao ESP32 primeiro.');
+      return;
+    }
+
+    try {
+      const encodedData = new TextEncoder().encode(message);
+
+      await device.writeCharacteristicWithResponseForService(
+        'service-uuid', // Substitua pelo UUID do serviço
+        'characteristic-uuid', // Substitua pelo UUID da característica
+        encodedData.toString('base64')
+      );
+      Alert.alert('Sucesso', 'Mensagem enviada ao ESP32 via Bluetooth.');
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao enviar mensagem.');
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Conectar ao ESP32</Text>
-
       <TextInput
         style={styles.input}
-        placeholder="SSID do WiFi"
-        value={wifiSSID}
-        onChangeText={setWifiSSID}
+        placeholder="Digite uma mensagem"
+        value={message}
+        onChangeText={setMessage}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha do WiFi"
-        value={wifiPassword}
-        onChangeText={setWifiPassword}
-        secureTextEntry
-      />
-
-      <Button title="Conectar" onPress={handleConnect} />
+      <Button title="Conectar via Bluetooth" onPress={handleConnect} />
+      <Button title="Enviar Mensagem" onPress={sendDataToDevice} />
     </View>
   );
 };
