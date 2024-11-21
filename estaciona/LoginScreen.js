@@ -14,16 +14,17 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
       return;
     }
-
+  
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('HomeScreen');
+      navigation.navigate('HomeScreen'); // Redireciona para a tela principal
     } catch (error) {
       console.error('Erro ao fazer login:', error.message);
       Alert.alert('Erro', error.message);
     }
   };
+   
 
   return (
     <View style={styles.container}>
