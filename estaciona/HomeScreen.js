@@ -14,7 +14,7 @@ const HomeScreen = ({ navigation }) => {
 
   const startAnimation = () => {
     Animated.loop(
-      Animated.sequence([ 
+      Animated.sequence([
         Animated.timing(carPosition, {
           toValue: 150,
           duration: 2000,
@@ -45,12 +45,12 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     startAnimation();
-    // Função para buscar o status das vagas
+
     const fetchVagasStatus = async () => {
       try {
-        const response = await fetch('http://192.168.15.3'); // Substitua pelo IP do seu ESP32
+        const response = await fetch("http://192.168.15.8"); // Substitua pelo IP do seu ESP32
         const data = await response.json();
-        
+
         // Atualize os estados com os dados recebidos
         setVagasLivres(data.vagasLivres);
         setVagasOcupadas(data.vagasOcupadas);
@@ -60,7 +60,13 @@ const HomeScreen = ({ navigation }) => {
       }
     };
 
-    fetchVagasStatus(); // Chama a função assim que o componente é montado
+    // Chamar a API a cada 5 segundos
+    const interval = setInterval(() => {
+      fetchVagasStatus();
+    }, 3000); // 5000ms = 5 segundos
+
+    // Limpar o intervalo quando o componente for desmontado
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -90,7 +96,14 @@ const HomeScreen = ({ navigation }) => {
       {/* Exibição das Vagas com Animação */}
       <View style={{ marginTop: 100 }}>
         {[...Array(vagasLivres)].map((_, index) => (
-          <View key={index} style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+          <View
+            key={index}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             <Animated.View
               style={{
                 transform: [{ translateX: carPosition }],
@@ -105,16 +118,27 @@ const HomeScreen = ({ navigation }) => {
         ))}
 
         {[...Array(vagasOcupadas)].map((_, index) => (
-          <View key={index + vagasLivres} style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+          <View
+            key={index + vagasLivres}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             <CarSide name="car-side" size={40} color={"#fb6555"} />
             <Grass name="grass" size={40} color={"#fb6555"} />
-            <Text style={styles.optionTextOccu}>Vaga {vagasLivres + index + 1}</Text>
+            <Text style={styles.optionTextOccu}>
+              Vaga {vagasLivres + index + 1}
+            </Text>
           </View>
         ))}
       </View>
 
       <View style={{ marginTop: 50 }}>
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Status da Vaga:</Text>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          Status da Vaga:
+        </Text>
         <Text>{vagaStatus}</Text>
       </View>
     </View>
