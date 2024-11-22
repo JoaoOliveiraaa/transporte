@@ -19,38 +19,47 @@ float getDistance(int trigPin, int echoPin) {
   long duration;
   float distance;
 
-  // Envia pulso de 10 microssegundos
+  // Garante que apenas um sensor é ativado por vez
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // Lê a duração do pulso
-  duration = pulseIn(echoPin, HIGH);
-
-  // Calcula a distância em cm
+  duration = pulseIn(echoPin, HIGH, 30000); // Timeout de 30ms
+  if (duration == 0) {
+    return -1; // Indica erro (sensor não respondeu)
+  }
   distance = duration * 0.034 / 2;
 
+  delay(50); // Evita interferência entre os sensores
   return distance;
 }
 
 // Manipulador para enviar o estado das vagas
 void handleRoot() {
   float distance1 = getDistance(TRIG_PIN1, ECHO_PIN1);
+  delay(50); // Pequeno atraso antes de medir o próximo sensor
   float distance2 = getDistance(TRIG_PIN2, ECHO_PIN2);
 
-  String vaga1Status = (distance1 < 12.0) ? "Ocupada" : "Livre";
-  String vaga2Status = (distance2 < 12.0) ? "Ocupada" : "Livre";
+  // Logs para depuração
+  Serial.print("Distância Vaga 1: ");
+  Serial.println(distance1);
+  Serial.print("Distância Vaga 2: ");
+  Serial.println(distance2);
 
+  // Determinação do estado das vagas
+  String vaga1Status = (distance1 >= 0 && distance1 < 11.0) ? "Ocupada" : "Livre";
+  String vaga2Status = (distance2 >= 0 && distance2 < 11.0) ? "Ocupada" : "Livre";
+
+  // Geração da resposta em JSON
   String response = "{";
   response += "\"vaga1\": \"" + vaga1Status + "\",";
   response += "\"vaga2\": \"" + vaga2Status + "\"";
   response += "}";
 
+  // Envio da resposta
   server.sendHeader("Access-Control-Allow-Origin", "*");
-  server.sendHeader("Access-Control-Allow-Methods", "GET");
-  server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
   server.send(200, "application/json", response);
 }
 
