@@ -1,0 +1,84 @@
+#include <WiFi.h>
+#include <WebServer.h>
+
+// Configurações da rede WiFi
+const char* ssid = "NOME_DA_REDE";  // Substitua pelo nome da sua rede WiFi
+const char* password = "SENHA_DA_REDE";  // Substitua pela senha da sua rede WiFi
+
+// Configuração do servidor web
+WebServer server(80);
+
+// Pinos dos sensores ultrassônicos
+#define TRIG_PIN1 5
+#define ECHO_PIN1 18
+#define TRIG_PIN2 19
+#define ECHO_PIN2 21
+
+// Função para medir distância
+float getDistance(int trigPin, int echoPin) {
+  long duration;
+  float distance;
+
+  // Envia pulso de 10 microssegundos
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Lê a duração do pulso
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calcula a distância em cm
+  distance = duration * 0.034 / 2;
+
+  return distance;
+}
+
+// Manipulador para enviar o estado das vagas
+void handleRoot() {
+  float distance1 = getDistance(TRIG_PIN1, ECHO_PIN1);
+  float distance2 = getDistance(TRIG_PIN2, ECHO_PIN2);
+
+  String vaga1Status = (distance1 < 12.0) ? "Ocupada" : "Livre";
+  String vaga2Status = (distance2 < 12.0) ? "Ocupada" : "Livre";
+
+  String response = "{";
+  response += "\"vaga1\": \"" + vaga1Status + "\",";
+  response += "\"vaga2\": \"" + vaga2Status + "\"";
+  response += "}";
+
+  server.send(200, "application/json", response);
+}
+
+void setup() {
+  // Configuração inicial
+  Serial.begin(115200);
+
+  // Configuração dos pinos dos sensores
+  pinMode(TRIG_PIN1, OUTPUT);
+  pinMode(ECHO_PIN1, INPUT);
+  pinMode(TRIG_PIN2, OUTPUT);
+  pinMode(ECHO_PIN2, INPUT);
+
+  // Conexão WiFi
+  WiFi.begin(ssid, password);
+  Serial.print("Conectando-se ao WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("\nConectado ao WiFi!");
+  Serial.print("IP do dispositivo: ");
+  Serial.println(WiFi.localIP());
+
+  // Configuração do servidor
+  server.on("/", handleRoot);
+  server.begin();
+  Serial.println("Servidor iniciado!");
+}
+
+void loop() {
+  // Mantém o servidor rodando
+  server.handleClient();
+}
