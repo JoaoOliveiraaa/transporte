@@ -48,18 +48,21 @@ const HomeScreen = ({ navigation }) => {
 
     const fetchVagasStatus = async () => {
       try {
-        const response = await fetch("http://192.168.15.8"); // Substitua pelo IP do seu ESP32
+        const response = await fetch("http://192.168.204.42");
         const data = await response.json();
-
-        // Atualize os estados com os dados recebidos
-        setVagasLivres(data.vagasLivres);
-        setVagasOcupadas(data.vagasOcupadas);
-        setVagaStatus(data.vagaStatus);
+    
+        // Ajuste para os dados do ESP32
+        const vagasOcupadas = data.vaga1 === "Ocupada" ? 1 : 0;
+        const vagasLivres = data.vaga2 === "Livre" ? 1 : 0;
+    
+        setVagasLivres(vagasLivres);
+        setVagasOcupadas(vagasOcupadas);
+        setVagaStatus(`Vaga 1: ${data.vaga1}, Vaga 2: ${data.vaga2}`);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       }
     };
-
+    
     // Chamar a API a cada 5 segundos
     const interval = setInterval(() => {
       fetchVagasStatus();

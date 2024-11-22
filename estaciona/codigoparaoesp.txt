@@ -2,8 +2,8 @@
 #include <WebServer.h>
 
 // Configurações da rede WiFi
-const char* ssid = "VIVOFIBRA-WIFI6-B871";  // Substitua pelo nome da sua rede WiFi
-const char* password = "mariacecilia456";  // Substitua pela senha da sua rede WiFi
+const char* ssid = "S24";  // Substitua pelo nome da sua rede WiFi
+const char* password = "santastico";  // Substitua pela senha da sua rede WiFi
 
 // Configuração do servidor web
 WebServer server(80);
