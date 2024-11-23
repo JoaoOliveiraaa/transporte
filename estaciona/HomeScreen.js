@@ -76,37 +76,28 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.park}>
-          <TouchableOpacity style={styles.btnPark}>
+          <TouchableOpacity>
             <Text style={{ fontSize: 18, fontWeight: "bold", color: "#333333" }}>
-              Total de Vagas: {vagasLivres + vagasOcupadas}
+              Total de Vagas: 4
             </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.statusPark}>
-          <TouchableOpacity style={styles.freePark}>
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#14AE5C" }}>
-              Vagas Livres: {vagasLivres}
-            </Text>
+          <TouchableOpacity>
+            <Text style={styles.optionTextFree}>Vagas Livres: {vagasLivres}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.occupiedPark}>
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fb6555" }}>
-              Vagas Ocupadas: {vagasOcupadas}
-            </Text>
+          <TouchableOpacity>
+            <Text style={styles.optionTextOccu}>Vagas Ocupadas: {vagasOcupadas}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Exibição das Vagas com Animação */}
-      <View style={{ marginTop: 100 }}>
+      <View style={{ marginTop: 50 }}>
+        {/* Vagas Livres */}
         {[...Array(vagasLivres)].map((_, index) => (
-          <View
-            key={index}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
+          
+          <View key={index} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between",}}>
+            <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between",}}>
             <Animated.View
               style={{
                 transform: [{ translateX: carPosition }],
@@ -116,34 +107,36 @@ const HomeScreen = ({ navigation }) => {
               <CarSide name="car-side" size={40} color={"#14AE5C"} />
             </Animated.View>
             <Grass name="grass" size={40} color={"#14AE5C"} />
-            <Text style={styles.optionTextFree}>Vaga {index + 1}</Text>
-          </View>
+            </View>
+
+            <View style={styles.option}>
+              <Text style={styles.optionTextFree}>Vaga {index + 1}</Text>
+            </View>
+        </View>
+
+          
         ))}
 
+        {/* Vagas Ocupadas */}
         {[...Array(vagasOcupadas)].map((_, index) => (
-          <View
-            key={index + vagasLivres}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <CarSide name="car-side" size={40} color={"#fb6555"} />
-            <Grass name="grass" size={40} color={"#fb6555"} />
+          
+          <View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <CarSide name="car-side" size={40} color="#fb6555" />
+              <Grass name="grass" size={40} color="#fb6555" />
+            </View>
+          <View key={index + vagasLivres} style={styles.option}>
+            
             <Text style={styles.optionTextOccu}>
               Vaga {vagasLivres + index + 1}
             </Text>
           </View>
+          </View>
+          
         ))}
       </View>
 
-      <View style={{ marginTop: 50 }}>
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-          Status da Vaga:
-        </Text>
-        <Text>{vagaStatus}</Text>
-      </View>
+      
     </View>
   );
 };
