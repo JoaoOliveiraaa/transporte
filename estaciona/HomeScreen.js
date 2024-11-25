@@ -50,23 +50,32 @@ const HomeScreen = ({ navigation }) => {
       try {
         const response = await fetch("http://192.168.204.42");
         const data = await response.json();
-    
+
         // Ajuste para os dados do ESP32
-        const vagasOcupadas = data.vaga1 === "Ocupada" ? 1 : 0;
-        const vagasLivres = data.vaga2 === "Livre" ? 1 : 0;
-    
+        const vagasOcupadas =
+          (data.vaga1 === "Ocupada" ? 1 : 0) +
+          (data.vaga2 === "Ocupada" ? 1 : 0) +
+          (data.vaga3 === "Ocupada" ? 1 : 0);
+
+        const vagasLivres =
+          (data.vaga1 === "Livre" ? 1 : 0) +
+          (data.vaga2 === "Livre" ? 1 : 0) +
+          (data.vaga3 === "Livre" ? 1 : 0);
+
         setVagasLivres(vagasLivres);
         setVagasOcupadas(vagasOcupadas);
-        setVagaStatus(`Vaga 1: ${data.vaga1}, Vaga 2: ${data.vaga2}`);
+        setVagaStatus(
+          `Vaga 1: ${data.vaga1}, Vaga 2: ${data.vaga2}, Vaga 3: ${data.vaga3}`
+        );
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
       }
     };
-    
-    // Chamar a API a cada 5 segundos
+
+    // Chamar a API a cada 3 segundos
     const interval = setInterval(() => {
       fetchVagasStatus();
-    }, 3000); // 5000ms = 5 segundos
+    }, 3000);
 
     // Limpar o intervalo quando o componente for desmontado
     return () => clearInterval(interval);
@@ -76,67 +85,80 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.park}>
-          <TouchableOpacity>
+          <TouchableOpacity style={styles.btnPark}>
             <Text style={{ fontSize: 18, fontWeight: "bold", color: "#333333" }}>
-              Total de Vagas: 4
+              Total de Vagas: {vagasLivres + vagasOcupadas}
             </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.statusPark}>
-          <TouchableOpacity>
-            <Text style={styles.optionTextFree}>Vagas Livres: {vagasLivres}</Text>
+          <TouchableOpacity style={styles.freePark}>
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#14AE5C" }}>
+              Vagas Livres: {vagasLivres}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.optionTextOccu}>Vagas Ocupadas: {vagasOcupadas}</Text>
+          <TouchableOpacity style={styles.occupiedPark}>
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fb6555" }}>
+              Vagas Ocupadas: {vagasOcupadas}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={{ marginTop: 50 }}>
-        {/* Vagas Livres */}
+      {/* Exibição das Vagas com Animação */}
+      <View style={{ marginTop: 100 }}>
         {[...Array(vagasLivres)].map((_, index) => (
-          
-          <View key={index} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between",}}>
-            <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between",}}>
-            <Animated.View
+          <View key={`vaga-livre-${index}`}>
+            <View
               style={{
-                transform: [{ translateX: carPosition }],
-                opacity: carOpacity,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
               }}
             >
-              <CarSide name="car-side" size={40} color={"#14AE5C"} />
-            </Animated.View>
-            <Grass name="grass" size={40} color={"#14AE5C"} />
+              <Animated.View
+                style={{
+                  transform: [{ translateX: carPosition }],
+                  opacity: carOpacity,
+                }}
+              >
+                <CarSide name="car-side" size={40} color={"#14AE5C"} />
+              </Animated.View>
+              <Grass name="grass" size={40} color={"#14AE5C"} />
             </View>
-
             <View style={styles.option}>
               <Text style={styles.optionTextFree}>Vaga {index + 1}</Text>
             </View>
-        </View>
-
-          
+          </View>
         ))}
 
-        {/* Vagas Ocupadas */}
         {[...Array(vagasOcupadas)].map((_, index) => (
-          
-          <View>
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <CarSide name="car-side" size={40} color="#fb6555" />
-              <Grass name="grass" size={40} color="#fb6555" />
+          <View key={`vaga-ocupada-${index}`}>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <CarSide name="car-side" size={40} color={"#fb6555"} />
+              <Grass name="grass" size={40} color={"#fb6555"} />
             </View>
-          <View key={index + vagasLivres} style={styles.option}>
-            
-            <Text style={styles.optionTextOccu}>
-              Vaga {vagasLivres + index + 1}
-            </Text>
+            <View style={styles.option}>
+              <Text style={styles.optionTextOccu}>
+                Vaga {vagasLivres + index + 1}
+              </Text>
+            </View>
           </View>
-          </View>
-          
         ))}
       </View>
 
-      
+      <View style={{ marginTop: 50, display: "none" }}>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          Status da Vaga:
+        </Text>
+        <Text>{vagaStatus}</Text>
+      </View>
     </View>
   );
 };
@@ -174,6 +196,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  option: {
+    marginBottom: 20,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
