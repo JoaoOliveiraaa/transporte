@@ -79,37 +79,87 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.btnHeader}>
-          <Text style={styles.textHeader}>
-            Total de Vagas: {vagas.length}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.park}>
+          <TouchableOpacity style={styles.btnPark}>
+            <Text
+              style={{ fontSize: 18, fontWeight: "bold", color: "#333333" }}
+            >
+              Total de Vagas: {vagas.length}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.statusPark}>
+          <TouchableOpacity style={styles.freePark}>
+            <Text
+              style={{ fontSize: 18, fontWeight: "bold", color: "#14AE5C" }}
+            >
+              Vagas Livres:{" "}
+              {vagas.filter((vaga) => vaga.status === "Livre").length}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.occupiedPark}>
+            <Text
+              style={{ fontSize: 18, fontWeight: "bold", color: "#fb6555" }}
+            >
+              Vagas Ocupadas:{" "}
+              {vagas.filter((vaga) => vaga.status === "Ocupada").length}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Exibição das vagas */}
-      <View style={styles.vagasContainer}>
+      {/* Exibição das Vagas com Condição */}
+      <View style={{ marginTop: 25 }}>
         {vagas.map((vaga, index) => (
-          <View key={vaga.id} style={styles.vaga}>
-            <View style={styles.vagaIconContainer}>
-              <CarSide
-                name="car-side"
-                size={40}
-                color={vaga.status === "Livre" ? "#14AE5C" : "#fb6555"}
-              />
+          <View
+            key={vaga.id}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              {vaga.status === "Livre" ? (
+                <Animated.View
+                  style={{
+                    transform: [{ translateX: carPosition }],
+                    opacity: carOpacity,
+                  }}
+                >
+                  <CarSide name="car-side" size={40} color={"#14AE5C"} />
+                </Animated.View>
+              ) : (
+                <CarSide name="car-side" size={40} color={"#fb6555"} />
+              )}
               <Grass
                 name="grass"
                 size={40}
                 color={vaga.status === "Livre" ? "#14AE5C" : "#fb6555"}
               />
             </View>
-            <Text
-              style={[
-                styles.vagaText,
-                { color: vaga.status === "Livre" ? "#14AE5C" : "#fb6555" },
-              ]}
-            >
-              Vaga {index + 1} - {vaga.status}
-            </Text>
+
+            <View style={styles.option}>
+              <Text
+                style={
+                  vaga.status === "Livre"
+                    ? styles.optionTextFree
+                    : styles.optionTextOccu
+                }
+              >
+                Vaga {index + 1}
+              </Text>
+            </View>
           </View>
         ))}
       </View>
@@ -118,6 +168,7 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.statusTitle}>Status Geral:</Text>
         <Text style={styles.statusText}>{vagaStatus}</Text>
       </View>
+
     </View>
   );
 };
@@ -129,69 +180,69 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4f7",
   },
   header: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  btnHeader: {
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  textHeader: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333333",
-  },
-  vagasContainer: {
-    marginTop: 20,
-  },
-  vaga: {
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-    alignItems: "center",
-  },
-  vagaIconContainer: {
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "60%",
   },
-  vagaText: {
-    marginTop: 10,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  statusContainer: {
-    marginTop: 30,
-    padding: 15,
+  park: {
+    width: "40%",
+    padding: 20,
     backgroundColor: "#fff",
     borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
-  statusTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+  statusPark: {
+    width: "40%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  statusText: {
-    fontSize: 16,
-    color: "#333333",
+  option: {
+    marginBottom: 5,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    width: "100%"
+  },
+  optionTextFree: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#14AE5C",
+  },
+  optionTextOccu: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fb6555",
+  },
+
+
+
+  statusContainer: {
+    display: "none",
   },
 });
+
 
 export default HomeScreen;
