@@ -3,10 +3,17 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert } from 'reac
 import Icon from 'react-native-vector-icons/FontAwesome'; 
 import { auth } from './firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useFonts } from 'expo-font'; // Hook para carregar as fontes
+import { Roboto_400Regular } from '@expo-google-fonts/roboto'; // Importando a fonte Roboto
 
 const RegistrationScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+
+  const [fontsLoaded] = useFonts({
+    Roboto_400Regular, // Font Roboto regular
+  });
 
   const handleRegister = async () => {
     console.log('Tentando registrar:', email);
@@ -101,12 +108,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#333',
     textAlign: 'center',
+     fontFamily: 'Roboto_400Regular',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
     color: '#666',
     textAlign: 'center',
+     fontFamily: 'Roboto_400Regular',
   },
   input: {
     width: '100%',
@@ -117,6 +126,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 12,
     backgroundColor: '#fff',
+     fontFamily: 'Roboto_400Regular',
   },
   button: {
     width: '100%',
@@ -130,6 +140,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+     fontFamily: 'Roboto_400Regular',
   },
   footer: {
     marginTop: 20,
@@ -139,10 +150,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginVertical: 5,
+     fontFamily: 'Roboto_400Regular',
   },
   link: {
     color: '#28a745',
     textDecorationLine: 'underline',
+     fontFamily: 'Roboto_400Regular',
   },
 });
 

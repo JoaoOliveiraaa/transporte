@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import * as Font from 'expo-font'; // Para carregar fontes no Expo
 import { View, Text, StyleSheet } from 'react-native';
 
 const DisplayScreen = () => {
   const [vagas, setVagas] = useState([]); // Armazena o status das vagas
   const [mensagem, setMensagem] = useState('Aguardando dados...'); // Mensagem para o usuário
 
+  const [fontLoaded, setFontLoaded] = useState(false); // Para verificar se a fonte foi carregada
+
+  useEffect(() => {
+    // Carregar a fonte
+    const loadFont = async () => {
+      await Font.loadAsync({
+        'Digital-7': require('./assets/fonts/digital-7.ttf'), // Caminho para a fonte
+      });
+      setFontLoaded(true); // Indica que a fonte foi carregada
+    };
+
+    loadFont();
+  }, []);
+ 
+ 
   useEffect(() => {
     // Função para gerar status randomicamente
     const gerarStatusVagas = () => {
@@ -50,6 +66,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: 'center',
     padding: 10,
+    fontFamily: 'Digital-7', // Nome da fonte carregada
   },
 });
 

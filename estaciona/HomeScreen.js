@@ -51,7 +51,6 @@ const HomeScreen = ({ navigation }) => {
         console.log(response);
         console.log(data);
 
-
         // Atualizar o estado das vagas com base nos dados da API
         const vagasAtualizadas = [
           { id: 1, status: data.vaga1 },
@@ -81,26 +80,20 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.park}>
           <TouchableOpacity style={styles.btnPark}>
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", color: "#333333" }}
-            >
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#333333", fontFamily: 'Roboto_400Regular', }}>
               Total de Vagas: {vagas.length}
             </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.statusPark}>
           <TouchableOpacity style={styles.freePark}>
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", color: "#14AE5C" }}
-            >
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#14AE5C", fontFamily: 'Roboto_400Regular', }}>
               Vagas Livres:{" "}
               {vagas.filter((vaga) => vaga.status === "Livre").length}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.occupiedPark}>
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", color: "#fb6555" }}
-            >
+            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fb6555", fontFamily: 'Roboto_400Regular', }}>
               Vagas Ocupadas:{" "}
               {vagas.filter((vaga) => vaga.status === "Ocupada").length}
             </Text>
@@ -169,15 +162,20 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.statusText}>{vagaStatus}</Text>
       </View>
 
-      <TouchableOpacity >
-        <Text onPress={() => navigation.navigate('DisplayScreen')}>Display</Text>
+      <TouchableOpacity onPress={() => navigation.navigate("DisplayScreen")}>
+        <Text>Ir para Display</Text>
       </TouchableOpacity>
-
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+
+  statusTitle: {
+    fontFamily: 'Roboto_400Regular',
+  },
+
+
   container: {
     flex: 1,
     padding: 20,
@@ -228,25 +226,24 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
-    width: "100%"
+    width: "100%",
   },
   optionTextFree: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#14AE5C",
+    fontFamily: 'Roboto_400Regular',
   },
   optionTextOccu: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#fb6555",
+    fontFamily: 'Roboto_400Regular',
   },
-
-
 
   statusContainer: {
-    display: "none",
+    display: "none", // Status está oculto, pode ser mostrado quando necessário
   },
 });
-
 
 export default HomeScreen;
