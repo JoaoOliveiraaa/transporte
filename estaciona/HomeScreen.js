@@ -7,9 +7,7 @@ const HomeScreen = ({ navigation }) => {
   const carPosition = useRef(new Animated.Value(0)).current;
   const carOpacity = useRef(new Animated.Value(1)).current;
 
-  // Estados para armazenar os dados das vagas
-  const [vagasLivres, setVagasLivres] = useState(0);
-  const [vagasOcupadas, setVagasOcupadas] = useState(0);
+  const [vagas, setVagas] = useState([]); // Armazena o estado das vagas
   const [vagaStatus, setVagaStatus] = useState("Carregando...");
 
   const startAnimation = () => {
@@ -50,20 +48,19 @@ const HomeScreen = ({ navigation }) => {
       try {
         const response = await fetch("http://192.168.204.42");
         const data = await response.json();
+        console.log(response);
+        console.log(data);
 
-        // Ajuste para os dados do ESP32
-        const vagasOcupadas =
-          (data.vaga1 === "Ocupada" ? 1 : 0) +
-          (data.vaga2 === "Ocupada" ? 1 : 0) +
-          (data.vaga3 === "Ocupada" ? 1 : 0);
 
-        const vagasLivres =
-          (data.vaga1 === "Livre" ? 1 : 0) +
-          (data.vaga2 === "Livre" ? 1 : 0) +
-          (data.vaga3 === "Livre" ? 1 : 0);
+        // Atualizar o estado das vagas com base nos dados da API
+        const vagasAtualizadas = [
+          { id: 1, status: data.vaga1 },
+          { id: 2, status: data.vaga2 },
+          { id: 3, status: data.vaga3 },
+        ];
+        setVagas(vagasAtualizadas);
 
-        setVagasLivres(vagasLivres);
-        setVagasOcupadas(vagasOcupadas);
+        // Atualizar o status geral para exibição
         setVagaStatus(
           `Vaga 1: ${data.vaga1}, Vaga 2: ${data.vaga2}, Vaga 3: ${data.vaga3}`
         );
@@ -72,92 +69,54 @@ const HomeScreen = ({ navigation }) => {
       }
     };
 
-    // Chamar a API a cada 3 segundos
     const interval = setInterval(() => {
       fetchVagasStatus();
     }, 3000);
 
-    // Limpar o intervalo quando o componente for desmontado
     return () => clearInterval(interval);
   }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.park}>
-          <TouchableOpacity style={styles.btnPark}>
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#333333" }}>
-              Total de Vagas: {vagasLivres + vagasOcupadas}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.statusPark}>
-          <TouchableOpacity style={styles.freePark}>
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#14AE5C" }}>
-              Vagas Livres: {vagasLivres}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.occupiedPark}>
-            <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fb6555" }}>
-              Vagas Ocupadas: {vagasOcupadas}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.btnHeader}>
+          <Text style={styles.textHeader}>
+            Total de Vagas: {vagas.length}
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Exibição das Vagas com Animação */}
-      <View style={{ marginTop: 100 }}>
-        {[...Array(vagasLivres)].map((_, index) => (
-          <View key={`vaga-livre-${index}`}>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
+      {/* Exibição das vagas */}
+      <View style={styles.vagasContainer}>
+        {vagas.map((vaga, index) => (
+          <View key={vaga.id} style={styles.vaga}>
+            <View style={styles.vagaIconContainer}>
+              <CarSide
+                name="car-side"
+                size={40}
+                color={vaga.status === "Livre" ? "#14AE5C" : "#fb6555"}
+              />
+              <Grass
+                name="grass"
+                size={40}
+                color={vaga.status === "Livre" ? "#14AE5C" : "#fb6555"}
+              />
+            </View>
+            <Text
+              style={[
+                styles.vagaText,
+                { color: vaga.status === "Livre" ? "#14AE5C" : "#fb6555" },
+              ]}
             >
-              <Animated.View
-                style={{
-                  transform: [{ translateX: carPosition }],
-                  opacity: carOpacity,
-                }}
-              >
-                <CarSide name="car-side" size={40} color={"#14AE5C"} />
-              </Animated.View>
-              <Grass name="grass" size={40} color={"#14AE5C"} />
-            </View>
-            <View style={styles.option}>
-              <Text style={styles.optionTextFree}>Vaga {index + 1}</Text>
-            </View>
-          </View>
-        ))}
-
-        {[...Array(vagasOcupadas)].map((_, index) => (
-          <View key={`vaga-ocupada-${index}`}>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <CarSide name="car-side" size={40} color={"#fb6555"} />
-              <Grass name="grass" size={40} color={"#fb6555"} />
-            </View>
-            <View style={styles.option}>
-              <Text style={styles.optionTextOccu}>
-                Vaga {vagasLivres + index + 1}
-              </Text>
-            </View>
+              Vaga {index + 1} - {vaga.status}
+            </Text>
           </View>
         ))}
       </View>
 
-      <View style={{ marginTop: 50, display: "none" }}>
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-          Status da Vaga:
-        </Text>
-        <Text>{vagaStatus}</Text>
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusTitle}>Status Geral:</Text>
+        <Text style={styles.statusText}>{vagaStatus}</Text>
       </View>
     </View>
   );
@@ -170,60 +129,68 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f4f7",
   },
   header: {
-    display: "flex",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  btnHeader: {
+    padding: 10,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  textHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333333",
+  },
+  vagasContainer: {
+    marginTop: 20,
+  },
+  vaga: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    alignItems: "center",
+  },
+  vagaIconContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    width: "60%",
   },
-  park: {
-    width: "40%",
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  statusPark: {
-    width: "40%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  option: {
-    marginBottom: 20,
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  optionTextFree: {
+  vagaText: {
+    marginTop: 10,
     fontSize: 18,
     fontWeight: "bold",
-    color: "#14AE5C",
   },
-  optionTextOccu: {
-    fontSize: 18,
+  statusContainer: {
+    marginTop: 30,
+    padding: 15,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  statusTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#fb6555",
+    marginBottom: 10,
+  },
+  statusText: {
+    fontSize: 16,
+    color: "#333333",
   },
 });
 

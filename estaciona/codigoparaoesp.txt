@@ -9,12 +9,13 @@ const char* password = "santastico";  // Substitua pela senha da sua rede WiFi
 WebServer server(80);
 
 // Pinos dos sensores ultrassônicos
-#define TRIG_PIN1 5
-#define ECHO_PIN1 18
-#define TRIG_PIN2 19
-#define ECHO_PIN2 21
+#define TRIG_PIN1 19
+#define ECHO_PIN1 21
+#define TRIG_PIN2 5
+#define ECHO_PIN2 18
+#define TRIG_PIN3 22
+#define ECHO_PIN3 23 // **Ajuste aqui se o ESP32 não suportar este pino**
 
-// Função para medir distância
 float getDistance(int trigPin, int echoPin) {
   long duration;
   float distance;
@@ -36,44 +37,44 @@ float getDistance(int trigPin, int echoPin) {
   return distance;
 }
 
-// Manipulador para enviar o estado das vagas
 void handleRoot() {
   float distance1 = getDistance(TRIG_PIN1, ECHO_PIN1);
-  delay(50); // Pequeno atraso antes de medir o próximo sensor
+  delay(50);
   float distance2 = getDistance(TRIG_PIN2, ECHO_PIN2);
+  delay(50);
+  float distance3 = getDistance(TRIG_PIN3, ECHO_PIN3);
 
-  // Logs para depuração
   Serial.print("Distância Vaga 1: ");
   Serial.println(distance1);
   Serial.print("Distância Vaga 2: ");
   Serial.println(distance2);
+  Serial.print("Distância Vaga 3: ");
+  Serial.println(distance3);
 
-  // Determinação do estado das vagas
   String vaga1Status = (distance1 >= 0 && distance1 < 11.0) ? "Ocupada" : "Livre";
   String vaga2Status = (distance2 >= 0 && distance2 < 11.0) ? "Ocupada" : "Livre";
+  String vaga3Status = (distance3 >= 0 && distance3 < 11.0) ? "Ocupada" : "Livre";
 
-  // Geração da resposta em JSON
   String response = "{";
   response += "\"vaga1\": \"" + vaga1Status + "\",";
-  response += "\"vaga2\": \"" + vaga2Status + "\"";
+  response += "\"vaga2\": \"" + vaga2Status + "\",";
+  response += "\"vaga3\": \"" + vaga3Status + "\"";
   response += "}";
 
-  // Envio da resposta
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "application/json", response);
 }
 
 void setup() {
-  // Configuração inicial
   Serial.begin(115200);
 
-  // Configuração dos pinos dos sensores
   pinMode(TRIG_PIN1, OUTPUT);
   pinMode(ECHO_PIN1, INPUT);
   pinMode(TRIG_PIN2, OUTPUT);
   pinMode(ECHO_PIN2, INPUT);
+  pinMode(TRIG_PIN3, OUTPUT);
+  pinMode(ECHO_PIN3, INPUT);
 
-  // Conexão WiFi
   WiFi.begin(ssid, password);
   Serial.print("Conectando-se ao WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -84,13 +85,11 @@ void setup() {
   Serial.print("IP do dispositivo: ");
   Serial.println(WiFi.localIP());
 
-  // Configuração do servidor
   server.on("/", handleRoot);
   server.begin();
   Serial.println("Servidor iniciado!");
 }
 
 void loop() {
-  // Mantém o servidor rodando
   server.handleClient();
 }
