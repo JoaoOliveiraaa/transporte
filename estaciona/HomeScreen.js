@@ -169,6 +169,10 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.statusText}>{vagaStatus}</Text>
       </View>
 
+      <TouchableOpacity >
+        <Text onPress={() => navigation.navigate('DisplayScreen')}>Display</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
